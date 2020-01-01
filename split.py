@@ -7,66 +7,27 @@ from numpy import linalg as LA
 import sys
 from scipy.sparse import linalg as sLa
 from scipy import sparse as sprs
-dt = 0.2
+
+
+dt = 1.0
 tsteps = 8400
 Time = range(tsteps)
 print "Defauls"
 
+#--------------------------------
+# CONVERSION VALUE FROM PS TO AU
+ps = 41341.37
+#--------------------------------
 
-
-def T(Rmin,Rmax,n_steps,nf,mass=9267.5654):
- N = n_steps*nf*2
- Te = np.zeros((N,N),dtype = np.float32)
- Rmin = float(Rmin)
- Rmax = float(Rmax)
- step = float((Rmax-Rmin)/n_steps)
- rDist = np.arange(Rmin,Rmax,step)
- K = np.pi/step
-
- for ri in range(n_steps):
-  for rj in range(ri,n_steps):
-   if ri == rj:  
-    T = (0.5/mass)*K**2/3*(1+(2.0/n_steps**2)) 
-   else:    
-    T = (0.5/mass)*(2*K**2/(n_steps**2))*((-1)**(rj-ri)/(np.sin(np.pi*(rj-ri)/n_steps)**2)) 
-   for i in range(2*nf-red):
-    row = ri + i*n_steps
-    col = rj + i*n_steps
-    if (abs(T)>1E-12):
-    	Te[row,col] = T
-    	Te[col,row] = Te[row,col]
- return Te
+#-------------------------------
+# Intial parameters
+nf = 25
+red = 22
+Rmin = 1.8
+Rmax = 25.0
+n_steps = 1500
+aniskip = 100000
 #---------------------------------
-
-#---------------------------------
-# CREATION OF THE HAMILTONIAN
-
-def H(Rmin,Rmax,n_steps,nf):
- #H = np.zeros((n_steps*2*nf,n_steps*2*nf))
- Rmin = float(Rmin)
- Rmax = float(Rmax)
- step = float((Rmax-Rmin)/n_steps)
- Vij = Pt.Help(Rmin,Rmax,n_steps,nf)
- Tij = T(Rmin,Rmax,n_steps,nf)
- H = Vij + Tij 
-
- return H
-
-
-def Ut(Rmin,Rmax,n_steps,nf,dt,red):	
- Rmin = float(Rmin)
- Rmax = float(Rmax)
- step = float((Rmax-Rmin)/n_steps)
- Vij = sprs.csr_matrix(Pt.Help(Rmin,Rmax,n_steps,nf,red))
- Tij = sprs.csr_matrix(T(Rmin,Rmax,n_steps,nf)[:(2*nf-red)*n_steps,:(2*nf-red)*n_steps])
- Hij = Tij + Vij 
- Tij = 0
- Vij = 0 
- print size(Hij) 
- #Hij = sprs.csr_matrix(Hij)
- exH = exdt( Hij, dt,(2*nf-red) * n_steps) #exdt(Hij,dt,N)
- return exH
-
 
 
 #---------------------------------
@@ -89,21 +50,6 @@ def psi(Rmin,Rmax,n,nf,vp,red):
  #return p/Norm**0.5
  return PtoD(p/np.sqrt(Norm),Rmin,Rmax,n,nf,vp,red)
 
-def psi2(Rmin,Rmax,n,nf,V,vp):
- p = np.zeros((2*n*nf),dtype=complex)
- Rmin = float(Rmin)
- Rmax = float(Rmax)
- step = float((Rmax-Rmin)/n)
- rDist = np.arange(Rmin,Rmax,step)
- Norm = 0
- CD0  =  V[:,0] 
- CP0  =  DtoP(CD0,Rmin,Rmax,n,nf,vp) 
- for ri in range(n):
-  for k in range(1):
-    p[ri+n] += abs(CP0[ri+k*n])
-  Norm += p[ri+n]**2
- return PtoD(p/math.sqrt(Norm),Rmin,Rmax,n,nf,vp)
-#---------------------------------
 #---------------------------------
 # ROTATION FROM D TO P
 
@@ -136,15 +82,6 @@ def PtoD(cP,rmin,rmax,xstep,nf,vp,red):
  return cD
 #       print size(Adt) + size(Apow)
 #---------------------------------
-# exponential of matrix 
-def exdt(A,dt,N,terms=14):
-	Apow = sprs.csr_matrix(np.identity(N,dtype=np.complex64))
-	Adt = sprs.csr_matrix(np.identity(N,dtype=np.complex64))
-	for i in range(1,terms):
-	    Apow = Apow.dot(A)  
-	    Adt  = Adt + Apow *  (( -1j * dt )**i) /math.factorial(i)
-	return Adt 
-	
 # sparse matrix size 	
 def size(m):
 	return m.data.nbytes + m.indptr.nbytes + m.indices.nbytes
@@ -172,20 +109,7 @@ def dissociation(cDt,Rmin,Rmax,n_steps,nf,red):
  return Prob
 #---------------------------------
 
-#--------------------------------
-# CONVERSION VALUE FROM PS TO AU
-ps = 41341.37
-#--------------------------------
 
-#-------------------------------
-# Intial parameters
-nf = 25
-red = 22
-Rmin = 1.8
-Rmax = 25.0
-n_steps = 1500
-aniskip = 100000
-#---------------------------------
 step = float((Rmax-Rmin)/n_steps)
 #---------------------------------
 Udt = Ut(Rmin,Rmax,n_steps,nf,dt,red) 
