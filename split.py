@@ -142,6 +142,17 @@ wf =   open("psi.txt","w+")
 cDt = cD0
 #-----------------------------
 for t in Time:
+ 
+ # psi 
+ if (t%aniskip==0):
+  for i in range(nR):
+   density = np.zeros(nState,dtype=np.complex64) 
+   for j in range(nState):
+    density[j] =  (cPt[j*nR + i].conjugate() * cPt[j*nR + i]).real
+   wf.write( str( Rmin +  step*i)  + " "  + " ".join(density.astype(str))  + "\n" )
+  wf.write("\n\n")	  
+
+
  print t 
  # population in diabatic representation
  rhoD = population(cDt, nState)
@@ -151,42 +162,30 @@ for t in Time:
  rhoP = population(cPt, nState) 
  popP.write(str(t*dt/ps) + " " + " ".join(rhoP.astype(str)) + "\n" ) 
  # evolution 1st step 
- cPt = UV.dot(cPt)
+ cPt = UV.dot(cPt, dtype=np.complex64)
  cDt = PtoD(cDt,Rmin, Rmax, nR, nf, vp, red)  
- # FFT
+ # evolution 2nd step
  fDt = np.zeros(len(cDt), dtype=np.complex64) 
  for iState in range(len(nState)):
+  # FFT
   fDt[ nR * iState: nR * (iState + 1) ]  = np.fft.fft(cDt[ nR * iState: nR * (iState + 1) ], dtype=np.complex64)
- # evolution 2nd step
- fDt = UT.dot(fDt)
- # iFFT
- 
-  
- #print cDt 
+  # evolution in FFT
+  fDt[ nR * iState: nR * (iState + 1) ] = UT.dot(fDt[ nR * iState: nR * (iState + 1) ], dtype=np.complex64)
 
- rhoD = population(cDt,nf*2-red)
- # rotation from D to A
- cPt = DtoP(cDt,Rmin,Rmax,n_steps,nf,vp,red)  
- #cAt = DtoP(cDt,Rmin,Rmax,n_steps,nf,ve)  
- rhoP = population(cPt,nf*2-red) 
- #rhoA = population(cAt,nf*2) 
- pDis = dissociation(cDt,Rmin,Rmax,n_steps,nf,red)
- popD.write(str(t*dt/ps) + " " + " ".join(rhoD.astype(str)) + "\n" )
- #popA.write(str(t/ps) + " " + " ".join(rhoA.astype(str)) + "\n" )
- popP.write(str(t*dt/ps) + " " + " ".join(rhoP.astype(str)) + "\n" ) 
+ # iFFT
+ for iState in range(len(nState)):
+  cDt[ nR * iState: nR * (iState + 1) ]  = np.fft.ifft(fDt[ nR * iState: nR * (iState + 1) ], dtype=np.complex64)
+ # evolution 2nd step
+ cPt = DtoP(cDt,Rmin,Rmax, nR,nf,vp,red)  
+ cPt = UV.dot(cPt, dtype=np.complex64)
+ cDt = PtoD(cDt,Rmin, Rmax, nR, nf, vp, red)  
+
+ pDis = dissociation(cDt,Rmin,Rmax,nR,nf,red)
  dis.write(str(t*dt/ps) + " "  + str(pDis) + "\n") 
- # psi20
- if (t%aniskip==0):
-  for i in range(n_steps):
-   density = np.zeros(2*nf-red,dtype=np.complex64) 
-   for j in range(2*nf-red):
-    density[j] =  (cPt[j*n_steps + i].conjugate() * cPt[j*n_steps + i]).real
-   wf.write( str( Rmin +  step*i)  + " "  + " ".join(density.astype(str))  + "\n" )
-  wf.write("\n\n")	     
+   
 
 np.savetxt("psi%s.txt"%(Time[-1]),cDt) 
 wf.close()
 popD.close()       
-popP.close()       
-#popA.close()       
+popP.close()            
 dis.close()
