@@ -25,10 +25,11 @@ nf = 25
 red = 22
 Rmin = 1.8
 Rmax = 25.0
-n_steps = 1500
+nR = 1500
 aniskip = 100000
 #---------------------------------
-
+dR = float((Rmax-Rmin)/nR)
+nState = nf*2-red
 
 #---------------------------------
 #---------------------------------
@@ -111,22 +112,24 @@ def dissociation(cDt,Rmin,Rmax,n_steps,nf,red):
 # exponential of V in adiabatic eigenrepresentation
 def expV(ep, dt):
   return np.exp(-1j * dt * ep, dtype=np.complex64) 
+# exponential of T in momentum (FFT) representation
+def expT(dx, dt, n_steps, mass = 9267.5654):
+  p = np.fft.fftfreq(n_steps, dx)
+  return np.exp(-1j * dt * (p*p)/(2*mass), dtype=np.complex64) 
 
 
-
-step = float((Rmax-Rmin)/n_steps)
-nState = nf*2-red
 #---------------------------------
-# Energies
+#    MAIN CODE
 #---------------------------------
 
 #ve = Pt.electronic(Rmin,Rmax,n_steps,nf)
-ep, vp = Pt.polariton(Rmin,Rmax,n_steps,nf,red)
+ep, vp = Pt.polariton(Rmin,Rmax,nR,nf,red)
 UV = expV(ep, dt/2)
+UT = expT(dR, dt, nR)
 #ve = Pt.adiabat(Rmin,Rmax,n_steps,nf,red)
 
 # Initial Wf
-cD0 = psi(Rmin,Rmax,n_steps,nf,vp,red)
+cD0 = psi(Rmin, Rmax, nR, nf, vp, red)
 np.savetxt("psi0.txt",cD0.real) 
 #---------------------------------
 #---------------------------------
@@ -144,18 +147,20 @@ for t in Time:
  rhoD = population(cDt, nState)
  popD.write(str(t*dt/ps) + " " + " ".join(rhoD.astype(str)) + "\n" )
  # population in polaritonic representation
- cPt = DtoP(cDt,Rmin,Rmax,n_steps,nf,vp,red)  
+ cPt = DtoP(cDt,Rmin,Rmax, nR,nf,vp,red)  
  rhoP = population(cPt, nState) 
  popP.write(str(t*dt/ps) + " " + " ".join(rhoP.astype(str)) + "\n" ) 
  # evolution 1st step 
  cPt = UV.dot(cPt)
- cDt = PtoD(cDt,Rmin,Rmax,n_steps,nf,vp,red)  
+ cDt = PtoD(cDt,Rmin, Rmax, nR, nf, vp, red)  
  # FFT
  fDt = np.zeros(len(cDt), dtype=np.complex64) 
  for iState in range(len(nState)):
-  fDt[ n_steps * iState: n_steps * (iState + 1) ]  = np.fft.fft(cDt[ n_steps * iState: n_steps * (iState + 1) ], dtype=np.complex64)
+  fDt[ nR * iState: nR * (iState + 1) ]  = np.fft.fft(cDt[ nR * iState: nR * (iState + 1) ], dtype=np.complex64)
  # evolution 2nd step
-
+ fDt = UT.dot(fDt)
+ # iFFT
+ 
   
  #print cDt 
 
