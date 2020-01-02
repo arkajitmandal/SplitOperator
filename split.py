@@ -108,18 +108,21 @@ def dissociation(cDt,Rmin,Rmax,n_steps,nf,red):
   Prob += (np.matmul(cDt.T[start:end].conjugate(),cDt[start:end])).real
  return Prob
 #---------------------------------
+# exponential of V in adiabatic eigenrepresentation
+def expV(ep, dt):
+  return np.exp(-1j * dt * ep, dtype=np.complex64) 
+
 
 
 step = float((Rmax-Rmin)/n_steps)
-#---------------------------------
-Udt = Ut(Rmin,Rmax,n_steps,nf,dt,red) 
-
+nState = nf*2-red
 #---------------------------------
 # Energies
 #---------------------------------
 
 #ve = Pt.electronic(Rmin,Rmax,n_steps,nf)
-vp = Pt.polariton(Rmin,Rmax,n_steps,nf,red)
+ep, vp = Pt.polariton(Rmin,Rmax,n_steps,nf,red)
+UV = expV(ep, dt/2)
 #ve = Pt.adiabat(Rmin,Rmax,n_steps,nf,red)
 
 # Initial Wf
@@ -128,18 +131,32 @@ np.savetxt("psi0.txt",cD0.real)
 #---------------------------------
 #---------------------------------
 # Evolve
-popP = open("popP.txt","w+",buffering=0)
-popD = open("popD.txt","w+",buffering=0)
+popP = open("popP.txt","w+")
+popD = open("popD.txt","w+")
 #popA = open("popA.txt","w+",buffering=0)
-dis =  open("dis.txt","w+",buffering=0)
-wf =   open("psi.txt","w+",buffering=0)
+dis =  open("dis.txt","w+")
+wf =   open("psi.txt","w+")
 cDt = cD0
 #-----------------------------
 for t in Time:
  print t 
- # evolution
- cDt = Udt.dot(cDt)
+ # population in diabatic representation
+ rhoD = population(cDt, nState)
+ popD.write(str(t*dt/ps) + " " + " ".join(rhoD.astype(str)) + "\n" )
+ # population in polaritonic representation
+ cPt = DtoP(cDt,Rmin,Rmax,n_steps,nf,vp,red)  
+ rhoP = population(cPt, nState) 
+ popP.write(str(t*dt/ps) + " " + " ".join(rhoP.astype(str)) + "\n" ) 
+ # evolution 1st step 
+ cPt = UV.dot(cPt)
+ cDt = PtoD(cDt,Rmin,Rmax,n_steps,nf,vp,red)  
+ # FFT
+ fDt = np.zeros(len(cDt), dtype=np.complex64) 
+ for iState in range(len(nState)):
+  fDt[ n_steps * iState: n_steps * (iState + 1) ]  = np.fft.fft(cDt[ n_steps * iState: n_steps * (iState + 1) ], dtype=np.complex64)
+ # evolution 2nd step
 
+  
  #print cDt 
 
  rhoD = population(cDt,nf*2-red)

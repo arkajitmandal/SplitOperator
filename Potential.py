@@ -56,16 +56,12 @@ def adiabat(Rmin,Rmax,n,nf):
 
 
 def polariton(Rmin,Rmax,n,nf,red):
- Hpl = Help(Rmin,Rmax,n,nf)[:(nf*2-red)*n,:(nf*2-red)*n]
+ Hpl = Help(Rmin, Rmax, n, nf, red)
  vectors = np.zeros((n,(nf*2-red),(nf*2-red)),dtype=np.float32) 
- Ep = vectors = np.zeros((n,(nf*2-red)),dtype=np.float32) 
+ Ep = np.zeros((n,(nf*2-red)),dtype=np.float32) 
  # Interpolation of data
  for ri in range(n):
-  Hplr = np.zeros((nf*2-red,nf*2-red)) 
-  for row in range(2*nf-red):
-   for col in range(2*nf-red):
-  	Hplr[row,col] = Hpl[ row * n + ri , col * n + ri] 
-  E,V = Diag(Hplr)  
+  E,V = Diag(Hpl[ ri, :, :] )  
   #--- Phase Fix -------------
   #if ri>0:
   #	for ei in range(2*nf) :
@@ -75,8 +71,10 @@ def polariton(Rmin,Rmax,n,nf,red):
   #---------------------------
   Vold = V 
   vectors[ri,:,:] = V
- return vectors
+  Ep[ ri, :] = E  
+ return Ep, vectors
 #--------------------------------------------------------
+
 def suplement(x): 
    a               = 0.113932
    b               = 0.0103053
