@@ -93,22 +93,23 @@ for t in Time:
 
   # evolution 2nd step
   fDt = np.zeros(len(cDt), dtype=np.complex64) 
-  for i in range(len(nState)):
+  for i in range(nState):
     # FFT
     fDt[ nR * i: nR * (i + 1) ]  = np.fft.fft(cDt[ nR * i: nR * (i + 1) ], dtype=np.complex64)
     # evolution in FFT
     fDt[ nR * i: nR * (i + 1) ] = UT * fDt[ nR * i: nR * (i + 1) ] 
 
- # iFFT
- for iState in range(len(nState)):
-  cDt[ nR * iState: nR * (iState + 1) ]  = np.fft.ifft(fDt[ nR * iState: nR * (iState + 1) ], dtype=np.complex64)
- # evolution 2nd step
- cPt = DtoP(cDt,Rmin,Rmax, nR,nf,vp,red)  
- cPt = UV.dot(cPt, dtype=np.complex64)
- cDt = PtoD(cDt,Rmin, Rmax, nR, nf, vp, red)  
+  # iFFT
+  for i in range(nState):
+    cDt[ nR * i: nR * (i + 1) ]  = np.fft.ifft(fDt[ nR * i: nR * (i + 1) ], dtype=np.complex64)
+ 
+  # evolution 3rd step
+  cPt = DtoA(cDt, nR, nState, Up)  
+  cPt = UV * cPt 
+  cDt = AtoD(cDt, nR, nState, Up) 
 
- pDis = dissociation(cDt,Rmin,Rmax,nR,nf,red)
- dis.write(str(t*dt/ps) + " "  + str(pDis) + "\n") 
+  pDis = dissociation(cDt, R, nState)
+  dis.write(str(t*dt/ps) + " "  + str(pDis) + "\n") 
    
 
 np.savetxt("psi%s.txt"%(Time[-1]),cDt) 
