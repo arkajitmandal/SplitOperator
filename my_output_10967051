@@ -1,0 +1,6 @@
+Defauls
+(1.12258+0j)
+Traceback (most recent call last):
+  File "split.py", line 75, in <module>
+    density[j] =  (cPt[j*nR + i].conjugate() * cPt[j*nR + i]).real
+NameError: name 'cPt' is not defined

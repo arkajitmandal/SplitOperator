@@ -5,4 +5,4 @@
 #SBATCH -t 50:00:00
 #SBATCH -N 1
 #SBATCH --ntasks-per-node=1
-python serial.py
+python split.py

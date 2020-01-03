@@ -18,8 +18,8 @@ print "Defauls"
 # CONVERSION VALUE FROM PS TO AU
 ps = 41341.37
 #--------------------------------
-nf = 25
-red = 22
+nf = 2
+red = 0
 #-------------------------------
 # Intial parameters
 Rmin = 1.8
@@ -28,7 +28,7 @@ nR = 1500
 aniskip = 100000
 #---------------------------------
 dR = float((Rmax-Rmin)/nR)
-R = np.arange(Rmin,Rmax,step)
+R = np.arange(Rmin,Rmax,dR)
 #---------------------------------
 
 #---------------------------------
@@ -46,8 +46,8 @@ def expT(dR, dt, nR, mass = 9267.5654):
 #---------------------------------
 
 #ve = Pt.electronic(Rmin,Rmax,n_steps,nf)
-Ep, Up = polariton(R, nf, red)
-nState = len(Ep)/nR 
+Ep, Up = Pt.polariton(R, nf, red)
+nState = Ep.shape[1]
 UV = expV(Ep, dt/2)
 UT = expT(dR, dt, nR)
 #ve = Pt.adiabat(Rmin,Rmax,n_steps,nf,red)
@@ -66,17 +66,6 @@ cDt = cD0
 #-----------------------------
 
 for t in Time:
- 
-  # write wavefunction
-  if (t%aniskip==0):
-    for i in range(nR):
-      density = np.zeros(nState,dtype=np.complex64) 
-      for j in range(nState):
-        density[j] =  (cPt[j*nR + i].conjugate() * cPt[j*nR + i]).real
-      wf.write( str( Rmin +  step*i)  + " "  + " ".join(density.astype(str))  + "\n" )
-    wf.write("\n\n")	  
-  #--------------------
-
   print t 
   # population in diabatic representation
   rhoD = population(cDt, nState)
@@ -87,6 +76,16 @@ for t in Time:
   rhoP = population(cPt, nState) 
   popP.write(str(t*dt/ps) + " " + " ".join(rhoP.astype(str)) + "\n" ) 
   
+  # write wavefunction
+  if (t%aniskip == 0):
+    for i in range(nR):
+      density = np.zeros(nState,dtype=np.complex64) 
+      for j in range(nState):
+        density[j] =  (cPt[j*nR + i].conjugate() * cPt[j*nR + i]).real
+      wf.write( str( Rmin +  dR * i)  + " "  + " ".join(density.astype(str))  + "\n" )
+    wf.write("\n\n")	  
+  #--------------------
+
   # evolution 1st step 
   cPt = UV * cPt 
   cDt = AtoD(cDt, nR, nState, Up) 

@@ -1,12 +1,13 @@
+from numpy import linalg as LA
+import numpy as np
 # INITIAL WAVE-FUNCTION
 def psi(R, Up, nState):
   nR = len(R) 
   p = np.zeros( nState * nR, dtype=np.complex64)
   istate = 1
-  A = 0.260778 
   B = 19.1221  
-  C = 3.01125 
-  p[istate * nR: (istate + 1) * nR] = A*np.exp(-B * R -C)**2.0)  
+  R0 = 3.01125 
+  p[istate * nR: (istate + 1) * nR] = np.exp(-B * (R - R0)**2.0 )
   norm = np.sqrt(p.dot( p.conjugate())) 
   p = p/norm
   #return p
@@ -59,28 +60,6 @@ def dissociation(cDt, R, nState):
     end = (i + 1) * nR
     Prob += (np.matmul(cDt.T[start:end].conjugate(),cDt[start:end])).real
   return Prob
-
-
-def polariton(R, nf, red = 0):
-  Hpl = Help(R, nf, red) 
-  nR  = len(R)
-  nState = len(Hpl)/nR
-  vectors = np.zeros( (nR, nState, nState), dtype=np.float32) 
-  Ep = np.zeros( (nR, nState), dtype=np.float32) 
-  # Interpolation of data
-  for ri in range(nR):
-    E,V = Diag(Hpl[ ri, :, :] )  
-    #--- Phase Fix -------------
-    #if ri>0:
-    #	for ei in range(2*nf) :
-    #	  sign = np.dot(Vold[:,ei],V[:,ei])
-    #       sign = sign/abs(sign)
-    #	  V = V*sign
-    #---------------------------
-    Vold = V 
-    vectors[ri,:,:] = V
-    Ep[ ri, :] = E  
-return Ep, vectors
 
 #----------------------------------------
 # MATRIX DIAGONALIZATION

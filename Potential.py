@@ -2,9 +2,29 @@ import math
 import time
 import numpy as np
 import scipy as sp
-from numpy import linalg as LA
 from tools import Diag 
 
+#-------------------------------------
+def polariton(R, nf, red = 0):
+  Hpl = Help(R, nf, red) 
+  nR  = len(R)
+  nState = Hpl.shape[1]
+  vectors = np.zeros( (nR, nState, nState), dtype=np.float32) 
+  Ep = np.zeros( (nR, nState), dtype=np.float32) 
+  # Interpolation of data
+  for ri in range(nR):
+    E,V = Diag(Hpl[ ri, :, :] )  
+    #--- Phase Fix -------------
+    #if ri>0:
+    #	for ei in range(2*nf) :
+    #	  sign = np.dot(Vold[:,ei],V[:,ei])
+    #       sign = sign/abs(sign)
+    #	  V = V*sign
+    #---------------------------
+    Vold = V 
+    vectors[ri,:,:] = V
+    Ep[ ri, :] = E  
+  return Ep, vectors
 
 #-------------------------------------
 # ENERGY FUNCTION
@@ -32,7 +52,7 @@ def suplement(x):
 
 def Help(R, nf = 25, red = 22):
  wc = 7.5/27.2114
- xi = 0.04
+ xi = 0.0
  nR = len(R)
  nState = (2*nf-red)
  He = np.zeros((nR, nState, nState), dtype = np.float32)
@@ -40,13 +60,13 @@ def Help(R, nf = 25, red = 22):
  #-------------------------------------------
  # Electronic Data
  #----------------------------------------------
- H11 =  Ex(R,'DIABATIC_ENERGY_IONIC_STATE.dat')
- H22 =  Ex(R,'DIABATIC_ENERGY_ATOMIC_STATE.dat')
- H12 =  Ex(R, 'DIABATIC_COUPLING_CONSTANT.dat') 
+ H11 =  Ex(R,'dat/DIABATIC_ENERGY_IONIC_STATE.dat')
+ H22 =  Ex(R,'dat/DIABATIC_ENERGY_ATOMIC_STATE.dat')
+ H12 =  Ex(R, 'dat/DIABATIC_COUPLING_CONSTANT.dat') 
  H11f = suplement(R) 
  #-------------------------------------------
- mu11 = Ex(R,'DIABATIC_DIPOLE_IONIC_STATE.dat') 
- mu22 = Ex(R, 'DIABATIC_DIPOLE_ATOMIC_STATE.dat') 
+ mu11 = Ex(R,'dat/DIABATIC_DIPOLE_IONIC_STATE.dat') 
+ mu22 = Ex(R,'dat/DIABATIC_DIPOLE_ATOMIC_STATE.dat') 
  #----------------------------------------------
  
  # Interpolation of data
@@ -60,7 +80,7 @@ def Help(R, nf = 25, red = 22):
   ED[1,0] = ED[0,1]
 
   u_ab = np.zeros((2,2))
-  u_ab[0,0] = (1-s) * mu11[ri] + s * (rDist[ri]*1.03022 - 0.508982)
+  u_ab[0,0] = (1-s) * mu11[ri] + s * (R[ri]*1.03022 - 0.508982)
   u_ab[1,1] = (1-s) * mu22[ri] 
   dse = np.matmul(u_ab,u_ab)
   for i in range(nState):

@@ -1,0 +1,10 @@
+Defauls
+(1500,) (0,)
+(1500,) 1
+1500 3000
+Traceback (most recent call last):
+  File "split.py", line 56, in <module>
+    cD0 = psi(R, Up, nState)
+  File "/gpfs/fs2/scratch/amandal4/LiF/FINAL2/Split/code/tools.py", line 14, in psi
+    p[istate * nR: (istate + 1) * nR] = A * np.exp(-B * R - C)**2.0
+ValueError: could not broadcast input array from shape (1500) into shape (0)

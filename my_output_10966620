@@ -1,0 +1,14 @@
+/gpfs/fs2/scratch/amandal4/LiF/FINAL2/Split/code/tools.py:16: RuntimeWarning: divide by zero encountered in divide
+  p = p/norm
+/gpfs/fs2/scratch/amandal4/LiF/FINAL2/Split/code/tools.py:16: RuntimeWarning: invalid value encountered in divide
+  p = p/norm
+/gpfs/fs2/scratch/amandal4/LiF/FINAL2/Split/code/tools.py:30: RuntimeWarning: invalid value encountered in multiply
+  cD[k] += U[i, j] * cP[l]
+Defauls
+(1500,) (1500,)
+(6000,) 4
+1500 3000
+Traceback (most recent call last):
+  File "split.py", line 75, in <module>
+    density[j] =  (cPt[j*nR + i].conjugate() * cPt[j*nR + i]).real
+NameError: name 'cPt' is not defined

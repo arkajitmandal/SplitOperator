@@ -1,0 +1,7 @@
+Defauls
+(1.12258+0j)
+0
+Traceback (most recent call last):
+  File "split.py", line 85, in <module>
+    wf.write( str( Rmin +  step*i)  + " "  + " ".join(density.astype(str))  + "\n" )
+NameError: name 'step' is not defined
