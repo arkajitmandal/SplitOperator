@@ -9,8 +9,8 @@ from scipy.sparse import linalg as sLa
 from scipy import sparse as sprs
 from tools import *
 
-dt = 1.0
-tsteps = 8400
+dt = 8.0
+tsteps = 1200
 Time = range(tsteps)
 print "Defauls"
 
@@ -18,14 +18,14 @@ print "Defauls"
 # CONVERSION VALUE FROM PS TO AU
 ps = 41341.37
 #--------------------------------
-nf = 1
+nf = 2
 red = 0
 #-------------------------------
 # Intial parameters
 Rmin = 1.8
-Rmax = 10.0
-nR = 512
-aniskip = 25
+Rmax = 30.0
+nR = 1024
+aniskip = 250
 #---------------------------------
 dR = float((Rmax-Rmin)/nR)
 R = np.arange(Rmin,Rmax,dR)
@@ -107,7 +107,7 @@ for t in Time:
   cPt = UV * cPt 
   cDt = AtoD(cPt, nR, nState, Up) 
 
-  pDis = dissociation(cDt, R, nState)
+  pDis = dissociation(cDt, R, nState, nf)
   dis.write(str(t*dt/ps) + " "  + str(pDis) + "\n") 
    
 

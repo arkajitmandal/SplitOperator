@@ -4,7 +4,7 @@ import numpy as np
 def psi(R, Up, nState):
   nR = len(R) 
   p = np.zeros( nState * nR, dtype=np.complex64)
-  istate = 1
+  istate = 2
   B = 19.1221  
   R0 = 3.01125 
   p[istate * nR: (istate + 1) * nR] = np.exp(-B * (R - R0)**2.0 )
@@ -48,15 +48,15 @@ def population(Ci, nState) :
   return p
 
 # computing dissociation probability
-def dissociation(cDt, R, nState):
+def dissociation(cDt, R, nState, nf):
   Rmin = float(R[0])
   Rmax = float(R[-1])
   dR = float(R[1] - R[0])
   nR = len(R)
-  R0 = 15.0
+  R0 = 20.0
   ref = int((R0 - Rmin) / dR) 
   Prob = 0
-  for i in range(nState) :
+  for i in range(nf, nState) :
     start = (nR * i) + ref
     end = (i + 1) * nR
     Prob += (np.matmul(cDt.T[start:end].conjugate(),cDt[start:end])).real
