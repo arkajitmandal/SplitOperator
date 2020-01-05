@@ -9,21 +9,22 @@ def polariton(R, nf, red = 0):
   Hpl = Help(R, nf, red) 
   nR  = len(R)
   nState = Hpl.shape[1]
-  vectors = np.zeros( (nR, nState, nState), dtype=np.float32) 
-  Ep = np.zeros( (nR, nState), dtype=np.float32) 
+  vectors = np.zeros( (nR, nState, nState), dtype=np.complex64) 
+  Ep = np.zeros( (nR, nState), dtype=np.complex64) 
   # Interpolation of data
   for ri in range(nR):
     E,V = Diag(Hpl[ ri, :, :] )  
     #--- Phase Fix -------------
     #if ri>0:
-    #	for ei in range(2*nf) :
+    #	for ei in range(2*nf - red) :
     #	  sign = np.dot(Vold[:,ei],V[:,ei])
-    #       sign = sign/abs(sign)
-    #	  V = V*sign
+    #    sign = sign/abs(sign)
+    #	  V[:,ei] = V[:,ei] * sign
     #---------------------------
     Vold = V 
     vectors[ri,:,:] = V
     Ep[ ri, :] = E  
+  Ep = Ep.T.reshape((nState * nR))
   return Ep, vectors
 
 #-------------------------------------
@@ -39,11 +40,11 @@ def suplement(x):
    a               = 0.113932
    b               = 0.0103053
    c               = -0.000203488
-   fx = np.zeros(len(x)) 
+   fx = np.zeros(len(x))
    for xi in range(len(x)):
-    r = x[xi] 
+    r = x[xi]
     if r>25.0:
-	r = 25.0 
+	    r = 25.0
     fx[xi] = a+ b*r + c*r**2 
    return fx 
     
@@ -51,11 +52,11 @@ def suplement(x):
 # Data of the diabatic states
 
 def Help(R, nf = 25, red = 22):
- wc = 7.5/27.2114
+ wc = 8.0/27.2114
  xi = 0.0
  nR = len(R)
  nState = (2*nf-red)
- He = np.zeros((nR, nState, nState), dtype = np.float32)
+ He = np.zeros((nR, nState, nState), dtype = np.complex64)
  shift = 107.30974086754172 - 0.001129
  #-------------------------------------------
  # Electronic Data
@@ -92,7 +93,7 @@ def Help(R, nf = 25, red = 22):
      He[ri, i, j] = ED[a,b]*float((m==o)) + (o+0.5)*(wc)*float((a==b)*(m==o))
      He[ri, i, j] += u_ab[a,b]*xi*(np.sqrt(m)*float((m-1)==o)+np.sqrt(m+1)*float((m+1)==o))
      He[ri, i, j] += (xi**2.0)*(dse[a,b]/wc)*float(m==o) 
- return He
+ return He #[:, 1:, 1:]
 #--------------------------------------------------------
 
 #----------------------------------------

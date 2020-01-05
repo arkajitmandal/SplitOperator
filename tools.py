@@ -10,8 +10,8 @@ def psi(R, Up, nState):
   p[istate * nR: (istate + 1) * nR] = np.exp(-B * (R - R0)**2.0 )
   norm = np.sqrt(p.dot( p.conjugate())) 
   p = p/norm
-  #return p
-  return AtoD(p, nR, nState, Up)
+  return p
+  #return AtoD(p, nR, nState, Up)
 
 # rotating electronic representation
 def AtoD(cP, nR, nState, Up):
@@ -52,6 +52,7 @@ def dissociation(cDt, R, nState):
   Rmin = float(R[0])
   Rmax = float(R[-1])
   dR = float(R[1] - R[0])
+  nR = len(R)
   R0 = 15.0
   ref = int((R0 - Rmin) / dR) 
   Prob = 0
