@@ -9,8 +9,8 @@ from scipy.sparse import linalg as sLa
 from scipy import sparse as sprs
 from tools import *
 
-dt = 8.0
-tsteps = 1200
+dt = 1.0
+tsteps = 8400
 Time = range(tsteps)
 print "Defauls"
 
@@ -18,13 +18,13 @@ print "Defauls"
 # CONVERSION VALUE FROM PS TO AU
 ps = 41341.37
 #--------------------------------
-nf = 2
-red = 0
+nf = 25
+red = 22
 #-------------------------------
 # Intial parameters
 Rmin = 1.8
 Rmax = 30.0
-nR = 1024
+nR = 2048
 aniskip = 250
 #---------------------------------
 dR = float((Rmax-Rmin)/nR)
@@ -53,7 +53,7 @@ UT = expT(dR, dt, nR)
 #ve = Pt.adiabat(Rmin,Rmax,n_steps,nf,red)
 
 # Initial Wf
-cD0 = psi(R, Up, nState)
+cD0 = psi(R, Up, nState, nf)
 np.savetxt("psi0.txt",cD0.real) 
 #---------------------------------
 
@@ -82,7 +82,10 @@ for t in Time:
       density = np.zeros(nState,dtype=np.float32) 
       for j in range(nState):
         density[j] =  (cPt[j*nR + i].conjugate() * cPt[j*nR + i]).real
-      wf.write( str( Rmin +  dR * i)  + " "  + " ".join(density.astype(str))  + "\n" )
+      wf.write( str( Rmin +  dR * i)  + " "  + " ".join(density.astype(str)) )
+      for j in range(nState):
+        wf.write( " " + str(Ep[j * nR + i].real) )
+      wf.write("\n")
     wf.write("\n\n")	  
   #--------------------
 
