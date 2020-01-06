@@ -15,11 +15,11 @@ def polariton(R, nf, red = 0):
   for ri in range(nR):
     E,V = Diag(Hpl[ ri, :, :] )  
     #--- Phase Fix -------------
-    #if ri>0:
-    #	for ei in range(2*nf - red) :
-    #	  sign = np.dot(Vold[:,ei],V[:,ei])
-    #    sign = sign/abs(sign)
-    #	  V[:,ei] = V[:,ei] * sign
+    if ri>0:
+    	for ei in range(2*nf - red) :
+    	  sign = np.dot(Vold[:,ei],V[:,ei])
+          sign = sign/abs(sign)
+    	  V[:,ei] = V[:,ei] * sign
     #---------------------------
     Vold = V 
     vectors[ri,:,:] = V
@@ -52,8 +52,8 @@ def suplement(x):
 # Data of the diabatic states
 
 def Help(R, nf = 25, red = 22):
- wc = 8.0/27.2114
- xi = 0.0
+ wc = 7.5/27.2114
+ xi = 0.020000000
  nR = len(R)
  nState = (2*nf-red)
  He = np.zeros((nR, nState, nState), dtype = np.complex64)
