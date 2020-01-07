@@ -16,10 +16,13 @@ def polariton(R, nf, red = 0):
     E,V = Diag(Hpl[ ri, :, :] )  
     #--- Phase Fix -------------
     if ri>0:
-    	for ei in range(2*nf - red) :
-    	  sign = np.dot(Vold[:,ei],V[:,ei])
-          sign = sign/abs(sign)
-    	  V[:,ei] = V[:,ei] * sign
+      for ei in range(nState):
+        sign = np.zeros((nState))
+        for ej in range(nState):
+          sign[ej] = np.dot(Vold[:,ej],V[:,ei])
+        signId = np.argmax(np.abs(sign))
+        sign[signId] = sign[signId]/abs(sign[signId])
+        V[:,ei] = V[:,ei] * sign[signId]
     #---------------------------
     Vold = V 
     vectors[ri,:,:] = V
